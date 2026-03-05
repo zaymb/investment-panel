@@ -1,18 +1,85 @@
 import { useState } from "react";
-import { C, statusIcon, instStatusIcon, dirIcon, dirColor, typeIcon, alphaTag, todoUrgency, sourceLabel } from "../constants";
+import { C, statusIcon, instStatusIcon, dirIcon, dirColor, typeIcon, alphaTag, todoUrgency, sourceLabel, matchKeywords } from "../constants";
 import PieChart from "../components/PieChart";
 import Modal from "../components/Modal";
+import LinkedSearch from "../components/LinkedSearch";
 
 export default function Launchpad({
-  theses, instruments, todos, records, setTodos,
+  theses, instruments, todos, records, setTodos, setRecords,
   pieView, setPieView, pieData, handlePieUpdate,
   goThesis, goInstrument,
   mounted, card, sectionTitle, pill, inputStyle, btnPrimary,
 }) {
   const [quickInputOpen, setQuickInputOpen] = useState(false);
   const [quickInputType, setQuickInputType] = useState("操作");
-  const [newTodoText, setNewTodoText] = useState("");
   const [addTodoOpen, setAddTodoOpen] = useState(false);
+
+  // Quick input form state
+  const [qiInstrument, setQiInstrument] = useState("");
+  const [qiOpType, setQiOpType] = useState("");
+  const [qiQuantity, setQiQuantity] = useState("");
+  const [qiDayChange, setQiDayChange] = useState("");
+  const [qiDirection, setQiDirection] = useState("");
+  const [qiContent, setQiContent] = useState("");
+  const [qiLinked, setQiLinked] = useState([]);
+  const [qiSource, setQiSource] = useState("");
+
+  // Add todo form state
+  const [newTodoText, setNewTodoText] = useState("");
+  const [newTodoType, setNewTodoType] = useState("待研究");
+  const [newTodoLinked, setNewTodoLinked] = useState("");
+  const [newTodoDeadline, setNewTodoDeadline] = useState("");
+
+  const addDays = (days) => {
+    const d = new Date(); d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  };
+
+  const resetQuickInput = () => {
+    setQiInstrument(""); setQiOpType(""); setQiQuantity(""); setQiDayChange("");
+    setQiDirection(""); setQiContent(""); setQiLinked([]); setQiSource("");
+  };
+
+  const resetTodoForm = () => {
+    setNewTodoText(""); setNewTodoType("待研究"); setNewTodoLinked(""); setNewTodoDeadline("");
+  };
+
+  const handleQuickSave = () => {
+    const now = new Date();
+    const ts = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")} ${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+    const id = `r${Date.now()}`;
+
+    if (quickInputType === "操作") {
+      if (!qiInstrument || !qiOpType) return;
+      const inst = instruments.find(i => i.id === qiInstrument);
+      setRecords(prev => [{
+        id, timestamp: ts, type: "操作",
+        linkedTheses: inst ? [inst.primaryThesis] : [], linkedInstruments: [qiInstrument],
+        direction: qiOpType === "卖出" ? "-" : "+",
+        content: `${inst?.name} ${qiOpType}`,
+        operationDetail: { opType: qiOpType, quantity: qiQuantity, dayChange: qiDayChange },
+        source: null,
+      }, ...prev]);
+    } else if (quickInputType === "观点") {
+      if (!qiContent.trim()) return;
+      setRecords(prev => [{
+        id, timestamp: ts, type: "观点",
+        linkedTheses: qiLinked.filter(lid => theses.some(t => t.id === lid)),
+        linkedInstruments: qiLinked.filter(lid => instruments.some(i => i.id === lid)),
+        direction: qiDirection || "?", content: qiContent, source: null,
+      }, ...prev]);
+    } else {
+      if (!qiContent.trim()) return;
+      setRecords(prev => [{
+        id, timestamp: ts, type: "消息",
+        linkedTheses: qiLinked.filter(lid => theses.some(t => t.id === lid)),
+        linkedInstruments: qiLinked.filter(lid => instruments.some(i => i.id === lid)),
+        direction: qiDirection || "?", content: qiContent, source: qiSource || null,
+      }, ...prev]);
+    }
+    resetQuickInput();
+    setQuickInputOpen(false);
+  };
 
   return (
     <div style={{
@@ -198,37 +265,40 @@ export default function Launchpad({
         </div>
         {quickInputType === "操作" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <select style={inputStyle}>
+            <select style={inputStyle} value={qiInstrument} onChange={(e) => setQiInstrument(e.target.value)}>
               <option value="">选择标的</option>
               {instruments.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
             </select>
             <div style={{ display: "flex", gap: 8 }}>
               {["买入", "卖出", "转换"].map((op) => (
-                <button key={op} style={{ ...pill(false), border: `1px solid ${C.border}`, flex: 1 }}>{op}</button>
+                <button key={op} onClick={() => setQiOpType(op)}
+                  style={{ ...pill(qiOpType === op), border: `1px solid ${qiOpType === op ? C.accent : C.border}`, flex: 1 }}>{op}</button>
               ))}
             </div>
-            <input style={inputStyle} placeholder="数量" />
-            <input style={inputStyle} placeholder="当日涨幅 (e.g. +1.2%)" />
+            <input style={inputStyle} placeholder="数量" value={qiQuantity} onChange={(e) => setQiQuantity(e.target.value)} />
+            <input style={inputStyle} placeholder="当日涨幅 (e.g. +1.2%)" value={qiDayChange} onChange={(e) => setQiDayChange(e.target.value)} />
           </div>
         )}
         {quickInputType === "观点" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <select style={inputStyle}>
-              <option value="">关联 Thesis / 标的</option>
-              {theses.map((t) => <option key={t.id} value={t.id}>📋 {t.name}</option>)}
-              {instruments.map((i) => <option key={i.id} value={i.id}>📊 {i.name}</option>)}
-            </select>
+            <LinkedSearch theses={theses} instruments={instruments}
+              selected={qiLinked}
+              onToggle={(id) => setQiLinked(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
+              suggestions={matchKeywords(qiContent, theses, instruments)}
+              inputStyle={inputStyle} />
             <div style={{ display: "flex", gap: 8 }}>
               {["+", "-", "?"].map((d) => (
-                <button key={d} style={{ ...pill(false), border: `1px solid ${C.border}`, flex: 1, fontSize: 16, color: dirColor(d) }}>{d}</button>
+                <button key={d} onClick={() => setQiDirection(d)}
+                  style={{ ...pill(qiDirection === d), border: `1px solid ${qiDirection === d ? C.accent : C.border}`, flex: 1, fontSize: 16, color: dirColor(d) }}>{d}</button>
               ))}
             </div>
-            <textarea style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} placeholder="观点内容" />
+            <textarea style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} placeholder="观点内容"
+              value={qiContent} onChange={(e) => setQiContent(e.target.value)} />
           </div>
         )}
         {quickInputType === "消息" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <select style={inputStyle}>
+            <select style={inputStyle} value={qiSource} onChange={(e) => setQiSource(e.target.value)}>
               <option value="">来源</option>
               {["自己判断", "新闻", "分析师", "LLM对话"].map((s) => (
                 <option key={s} value={s}>{s}</option>
@@ -236,19 +306,21 @@ export default function Launchpad({
             </select>
             <div style={{ display: "flex", gap: 8 }}>
               {["+", "-", "?"].map((d) => (
-                <button key={d} style={{ ...pill(false), border: `1px solid ${C.border}`, flex: 1, fontSize: 16, color: dirColor(d) }}>{d}</button>
+                <button key={d} onClick={() => setQiDirection(d)}
+                  style={{ ...pill(qiDirection === d), border: `1px solid ${qiDirection === d ? C.accent : C.border}`, flex: 1, fontSize: 16, color: dirColor(d) }}>{d}</button>
               ))}
             </div>
-            <textarea style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} placeholder="消息内容" />
-            <select style={inputStyle}>
-              <option value="">关联（可选）</option>
-              {theses.map((t) => <option key={t.id} value={t.id}>📋 {t.name}</option>)}
-              {instruments.map((i) => <option key={i.id} value={i.id}>📊 {i.name}</option>)}
-            </select>
+            <textarea style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} placeholder="消息内容"
+              value={qiContent} onChange={(e) => setQiContent(e.target.value)} />
+            <LinkedSearch theses={theses} instruments={instruments}
+              selected={qiLinked}
+              onToggle={(id) => setQiLinked(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
+              suggestions={matchKeywords(qiContent, theses, instruments)}
+              inputStyle={inputStyle} />
           </div>
         )}
         <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end" }}>
-          <button style={btnPrimary}>保存</button>
+          <button style={btnPrimary} onClick={handleQuickSave}>保存</button>
         </div>
       </Modal>
 
@@ -259,28 +331,39 @@ export default function Launchpad({
             onChange={(e) => setNewTodoText(e.target.value)} />
           <div style={{ display: "flex", gap: 8 }}>
             {["待研究", "待决策"].map((t) => (
-              <button key={t} style={{ ...pill(false), border: `1px solid ${C.border}`, flex: 1 }}>{t}</button>
+              <button key={t} onClick={() => setNewTodoType(t)}
+                style={{ ...pill(newTodoType === t), border: `1px solid ${newTodoType === t ? C.accent : C.border}`, flex: 1 }}>{t}</button>
             ))}
           </div>
-          <select style={inputStyle}>
-            <option value="">关联（可选）</option>
-            {theses.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-            {instruments.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
-          </select>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 12, color: C.textMuted, whiteSpace: "nowrap" }}>截止日期</span>
-            <input type="date" style={{ ...inputStyle, flex: 1 }} id="todo-deadline" />
+          <LinkedSearch theses={theses} instruments={instruments}
+            selected={newTodoLinked ? [newTodoLinked] : []}
+            onToggle={(id) => setNewTodoLinked(prev => prev === id ? "" : id)}
+            suggestions={matchKeywords(newTodoText, theses, instruments)}
+            inputStyle={inputStyle} single />
+          <div>
+            <span style={{ fontSize: 12, color: C.textMuted, marginBottom: 6, display: "block" }}>截止日期</span>
+            <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+              {[{ label: "明天", days: 1 }, { label: "3天", days: 3 }, { label: "1周", days: 7 }].map((p) => (
+                <button key={p.days} onClick={() => setNewTodoDeadline(addDays(p.days))}
+                  style={{ ...pill(newTodoDeadline === addDays(p.days)), border: `1px solid ${newTodoDeadline === addDays(p.days) ? C.accent : C.border}`, flex: 1 }}>{p.label}</button>
+              ))}
+              {newTodoDeadline && (
+                <button onClick={() => setNewTodoDeadline("")}
+                  style={{ ...pill(false), border: `1px solid ${C.border}`, color: C.textDim, fontSize: 11, padding: "4px 8px" }}>清除</button>
+              )}
+            </div>
+            <input type="date" style={inputStyle} value={newTodoDeadline}
+              onChange={(e) => setNewTodoDeadline(e.target.value)} />
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
             <button style={btnPrimary} onClick={() => {
               if (newTodoText.trim()) {
-                const deadlineVal = document.getElementById("todo-deadline")?.value || null;
                 setTodos((prev) => [...prev, {
-                  id: `td${Date.now()}`, content: newTodoText, type: "待研究",
-                  linkedId: null, createdAt: new Date().toISOString().slice(0, 10),
-                  deadline: deadlineVal || null, done: false,
+                  id: `td${Date.now()}`, content: newTodoText, type: newTodoType,
+                  linkedId: newTodoLinked || null, createdAt: new Date().toISOString().slice(0, 10),
+                  deadline: newTodoDeadline || null, done: false,
                 }]);
-                setNewTodoText("");
+                resetTodoForm();
                 setAddTodoOpen(false);
               }
             }}>添加</button>

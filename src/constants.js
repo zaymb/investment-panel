@@ -9,6 +9,7 @@ export const INITIAL_THESES = [
     coreLogic: "全球上游油气投资较2014年高点下降35%，但已批准项目仍在投产。结构性缺口需等当前项目周期结束后显现。伊朗战争叠加可能加速供给收紧。",
     triggers: ["WTI站稳70", "库存结构性去库", "金油比从油端修复"],
     instruments: ["i1", "i2", "i3", "i4", "i5"],
+    keywords: ["石油", "油价", "WTI", "Brent", "OPEC", "中东", "伊朗", "霍尔木兹", "航运", "制裁", "capex", "供给", "油气"],
   },
   {
     id: "t2",
@@ -19,6 +20,7 @@ export const INITIAL_THESES = [
     coreLogic: "全球央行连续三年净购金超1000吨，去美元化趋势不可逆。1月闪崩清洗投机仓位，长期支撑更健康。",
     triggers: ["央行购金节奏", "实际利率走向", "美元信用事件"],
     instruments: ["i6"],
+    keywords: ["黄金", "金价", "央行", "购金", "去美元化", "避险", "实际利率", "美元", "通胀"],
   },
   {
     id: "t3",
@@ -29,17 +31,18 @@ export const INITIAL_THESES = [
     coreLogic: "电动车、电网、AI算力基建对铜铝需求增速远超矿端扩产节奏。",
     triggers: ["铜价站稳9500", "中国基建刺激落地", "矿端供给中断"],
     instruments: ["i7"],
+    keywords: ["有色", "铜", "铝", "新能源", "电动车", "电网", "AI", "基建", "矿"],
   },
 ];
 
 export const INITIAL_INSTRUMENTS = [
-  { id: "i1", name: "XOM", primaryThesis: "t1", linkedTheses: ["t1"], category: "进攻", positionLevel: "○", status: "观望", positionPct: 0, hasAlpha: true, entryRules: null, exitRules: null, scalingPlan: null },
-  { id: "i2", name: "BP", primaryThesis: "t1", linkedTheses: ["t1"], category: "进攻", positionLevel: "○", status: "待研究", positionPct: 0, hasAlpha: false, entryRules: null, exitRules: null, scalingPlan: null },
-  { id: "i3", name: "SHEL", primaryThesis: "t1", linkedTheses: ["t1"], category: "进攻", positionLevel: "○", status: "待研究", positionPct: 0, hasAlpha: false, entryRules: null, exitRules: null, scalingPlan: null },
-  { id: "i4", name: "中国海油", primaryThesis: "t1", linkedTheses: ["t1"], category: "进攻", positionLevel: "◔", status: "持有", positionPct: 3, hasAlpha: true, entryRules: "RSI<45 或回撤>10% 时定投加仓", exitRules: "圭亚那项目延期 → 减半仓", scalingPlan: "轻仓3%→中仓8%→重仓15%，每层需新催化剂确认" },
-  { id: "i5", name: "PBR", primaryThesis: "t1", linkedTheses: ["t1"], category: "进攻", positionLevel: "○", status: "待研究", positionPct: 0, hasAlpha: false, entryRules: null, exitRules: null, scalingPlan: null },
-  { id: "i6", name: "黄金ETF", primaryThesis: "t2", linkedTheses: ["t2"], category: "防守", positionLevel: "◕", status: "持有", positionPct: 25, hasAlpha: false, entryRules: "实际利率转负 或 央行单季购金>300吨", exitRules: "美联储意外加息200bp+", scalingPlan: "当前25%已是目标仓位，维持" },
-  { id: "i7", name: "有色ETF", primaryThesis: "t3", linkedTheses: ["t3"], category: "进攻", positionLevel: "◑", status: "持有", positionPct: 15, hasAlpha: false, entryRules: null, exitRules: null, scalingPlan: null },
+  { id: "i1", name: "XOM", primaryThesis: "t1", linkedTheses: ["t1"], category: "进攻", positionLevel: "○", status: "观望", positionPct: 0, hasAlpha: true, entryRules: null, exitRules: null, scalingPlan: null, keywords: ["XOM", "埃克森", "Exxon", "圭亚那"] },
+  { id: "i2", name: "BP", primaryThesis: "t1", linkedTheses: ["t1"], category: "进攻", positionLevel: "○", status: "待研究", positionPct: 0, hasAlpha: false, entryRules: null, exitRules: null, scalingPlan: null, keywords: ["BP", "英国石油"] },
+  { id: "i3", name: "SHEL", primaryThesis: "t1", linkedTheses: ["t1"], category: "进攻", positionLevel: "○", status: "待研究", positionPct: 0, hasAlpha: false, entryRules: null, exitRules: null, scalingPlan: null, keywords: ["SHEL", "壳牌", "Shell"] },
+  { id: "i4", name: "中国海油", primaryThesis: "t1", linkedTheses: ["t1"], category: "进攻", positionLevel: "◔", status: "持有", positionPct: 3, hasAlpha: true, entryRules: "RSI<45 或回撤>10% 时定投加仓", exitRules: "圭亚那项目延期 → 减半仓", scalingPlan: "轻仓3%→中仓8%→重仓15%，每层需新催化剂确认", keywords: ["中国海油", "海油", "CNOOC", "0883"] },
+  { id: "i5", name: "PBR", primaryThesis: "t1", linkedTheses: ["t1"], category: "进攻", positionLevel: "○", status: "待研究", positionPct: 0, hasAlpha: false, entryRules: null, exitRules: null, scalingPlan: null, keywords: ["PBR", "巴西石油", "Petrobras"] },
+  { id: "i6", name: "黄金ETF", primaryThesis: "t2", linkedTheses: ["t2"], category: "防守", positionLevel: "◕", status: "持有", positionPct: 25, hasAlpha: false, entryRules: "实际利率转负 或 央行单季购金>300吨", exitRules: "美联储意外加息200bp+", scalingPlan: "当前25%已是目标仓位，维持", keywords: ["黄金ETF", "GLD", "金ETF"] },
+  { id: "i7", name: "有色ETF", primaryThesis: "t3", linkedTheses: ["t3"], category: "进攻", positionLevel: "◑", status: "持有", positionPct: 15, hasAlpha: false, entryRules: null, exitRules: null, scalingPlan: null, keywords: ["有色ETF", "铜ETF"] },
 ];
 
 export const INITIAL_TODOS = [
@@ -94,6 +97,21 @@ export const sourceLabel = (s) => {
   if (s === "自己判断") return "🧠 自己判断";
   if (s === "LLM对话") return "🤖 LLM对话";
   return null;
+};
+
+export const matchKeywords = (text, theses, instruments) => {
+  if (!text.trim()) return [];
+  const lower = text.toLowerCase();
+  const results = [];
+  theses.forEach((t) => {
+    const score = [t.name, ...(t.keywords || [])].filter((k) => lower.includes(k.toLowerCase())).length;
+    if (score > 0) results.push({ id: t.id, name: t.name, type: "thesis", score });
+  });
+  instruments.forEach((i) => {
+    const score = [i.name, ...(i.keywords || [])].filter((k) => lower.includes(k.toLowerCase())).length;
+    if (score > 0) results.push({ id: i.id, name: i.name, type: "instrument", score });
+  });
+  return results.sort((a, b) => b.score - a.score);
 };
 
 // ─── Color System ─────────────────────────────────────────────

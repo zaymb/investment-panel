@@ -11,7 +11,7 @@ export default function InvestmentPanel() {
   const [theses, setTheses] = useState(INITIAL_THESES);
   const [instruments, setInstruments] = useState(INITIAL_INSTRUMENTS);
   const [todos, setTodos] = useState(INITIAL_TODOS);
-  const [records] = useState(INITIAL_RECORDS);
+  const [records, setRecords] = useState(INITIAL_RECORDS);
 
   const [view, setView] = useState("launchpad");
   const [selectedId, setSelectedId] = useState(null);
@@ -108,7 +108,7 @@ export default function InvestmentPanel() {
   }
 
   return <Launchpad
-    theses={theses} instruments={instruments} todos={todos} records={records} setTodos={setTodos}
+    theses={theses} instruments={instruments} todos={todos} records={records} setTodos={setTodos} setRecords={setRecords}
     pieView={pieView} setPieView={setPieView} pieData={getPieData()} handlePieUpdate={handlePieUpdate}
     goThesis={goThesis} goInstrument={goInstrument}
     mounted={mounted} card={card} sectionTitle={sectionTitle} pill={pill} inputStyle={inputStyle} btnPrimary={btnPrimary}
