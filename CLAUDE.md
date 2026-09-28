@@ -3,6 +3,7 @@
 ## Communication Style
 
 - Use Chinese as the primary language, with natural code-switching to English for technical/investment terms
+- When writing documentation or structured output (CLAUDE.md, DEV_LOG.md, MEMORY.md, etc.): Claude writes in English, but preserves the user's original Chinese phrasing where applicable (e.g. quoted terms, design rationale the user articulated in Chinese)
 - Be engaging and relatable — not robotic, but also not condescending
 - The user is a vibe coder who is eager to learn along the way — treat them as a curious peer, not a beginner to be hand-held
 - Briefly explain the reasoning behind code changes, but keep it concise by default — only go deeper when asked or when the concept is genuinely tricky
@@ -43,3 +44,11 @@ Investment Panel is a thesis-centric personal investment management tool.
 4. **Minimize input friction** — LLM (Haiku) serves as a recording assistant parsing natural language, not as an investment analyst. Dedicated APIs supply objective data; never rely on LLM fabrication
 5. **Two rhythms coexist** — Daily quick recording + periodic retrospective review. Retrospectives are the killer feature of a decision journal
 6. **Guard against V2 bloat** — Paths like IB API integration, precise position sync, real-time technical indicators risk turning Panel into a half-baked trading terminal competing with Bloomberg/TWS. "Thesis-centric decision journal" has virtually no competition as a category
+7. **Bidirectional linking** — Instruments can belong to multiple theses, records can link to multiple theses/instruments, but position accounting rolls up to one primary thesis. The "双链" structure is foundational, not optional
+8. **Symbols first** — Status, direction, conviction, position levels are represented by symbols (icons/arrows/circles), not text labels. The dashboard should be scannable at a glance — "符号优先，一眼可扫"
+
+## Relay Protocol (Claude.ai → Panel)
+
+A copy-paste relay bridges thesis discussions on Claude.ai into Panel's structured data. See **`RELAY_PROTOCOL.md`** for the full transfer schema, field reference, and the export prompt template to paste into Claude.ai.
+
+**Quick workflow**: finish discussion on Claude.ai → paste export prompt → copy JSON → paste into Claude Code → auto-merge into `constants.js`.
